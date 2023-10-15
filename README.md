@@ -1,0 +1,1 @@
+this is a website for quantum_razer laptop store
