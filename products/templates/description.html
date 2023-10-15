@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1 class="text-center text-dark">Specifications</h1>
+    <hr>
+{% endblock %}
+
+{% block description %}
+<div class="container d-flex space-between">
+    <div class="column left d-flex">
+        <div class="card w-100">
+            <div class="card-body">
+                <p class="card-text">Model: {{ product.name }}</p>
+                <p class="card-text">Processor: {{ product.description.processor }}</p> 
+                <p class="card-text">RAM: {{ product.description.ram }}</p>
+                <p class="card-text">Storage: {{ product.description.storage }}</p>
+                <p class="card-text">Price: {{ product.price }}</p>
+                <p class="card-text">Stock: {{ product.stock }}</p>
+                <p class="card-text">Contact: {{ product.description.contact }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="column right">
+        <div class="card" style="width: 18rem;">
+            <img src="{{ product.image_url }}" class="card-img-top" alt="Card image cap">
+        </div> 
+    </div>
+</div>
+{% endblock %}
