@@ -1,18 +1,25 @@
 from django.conf import settings
 from django.contrib import messages
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
+from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView, View
 from django.utils import timezone
 from .forms import CheckoutForm
+from .forms import SignUpForm
 from .models import (
     Item,
     Order,
     OrderItem,
     CheckoutAddress,
-    Payment
+    Payment,
+    Category
 )
 
 import stripe
@@ -22,6 +29,34 @@ stripe.api_key = settings.STRIPE_KEY
 class HomeView(ListView):
     model = Item
     template_name = "home.html"
+    context_object_name = 'items'  # Specify the context object name for the template
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        items_list = context['items']  # Retrieve items queryset from the context
+
+        # Number of items per page
+        items_per_page = 10
+
+        # Get the queryset
+        items_list = Item.objects.all()
+
+        print("Number of items before pagination:", len(items_list))#debugging
+
+        paginator = Paginator(items_list, items_per_page)
+
+        page_number = self.request.GET.get('page')
+        try:
+            items = paginator.page(page_number)
+        except PageNotAnInteger:
+            # If page is not an integer, deliver first page.
+            items = paginator.page(1)
+        except EmptyPage:
+            # If page is out of range, deliver last page of results.
+            items = paginator.page(paginator.num_pages)
+
+        context['items'] = items  # Update context with paginated items
+        return context
 
 
 class ProductView(DetailView):
@@ -161,10 +196,65 @@ class PaymentView(View):
             # Something else happened, completely unrelated to Stripe
             messages.error(self.request, "Not identified error")
             return redirect('/')
-
         
+def search(request):
+    query = request.GET.get('query')
+    if query:
+        items = Item.objects.filter(item_name__icontains=query)
+    else:
+        items = Item.objects.all()
+    return render(request, 'search.html', {'items': items, 'query': query})
 
+
+def category(request, brand):
+
+    #lookup the brand from the url
+    try:
+        category = Category.objects.get(name=brand)
+        brands = Item.objects.filter(category=category)
+        return render(request, 'category.html', {'brands':brands,'category':category})
+    
+    except:
+        messages.success(request, ("That category doesn't exist...."))
+        return redirect('/')
+
+def login_user(request):
+    if request.method == "post":
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None: 
+           login(request, user) 
+           messages.info(request, "You have been logged in.")
+           return redirect('/')
+
+    else:
+           
+     return render(request, 'registration/login.html', {})
         
+def logout_user(request):
+    logout(request)
+    messages.success(request, ("You have been logged out."))
+    return redirect('/')
+
+def register_user(request):
+    form = SignUpForm()
+    if request.method == "POST":
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            form.save() 
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password1']
+
+            user = authenticate(username= username, password =  password )
+            login(request,user)
+            messages.success(request, ("You have been registered successfully!!"))
+            return redirect('/')
+        else:
+            messages.success(request, ("Whoops! There was a problem, please try again!"))
+            return redirect('products:register')
+    else:
+        return render(request, 'registration/register.html', {'form':form})
 
 @login_required
 def add_to_cart(request, pk):

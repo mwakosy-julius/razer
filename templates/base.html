@@ -30,7 +30,7 @@
   <!-- Include MDB JS -->
   <script src="{% static 'js/mdb.min.js' %}"></script>
 
-  <link rel="apple-touch-icon" sizes="180x180" href="{% static 'favicon_io/apple-touch-icon.png' %}">
+  <link rel="apple-touch-icon" sizes="180x180" hfrom django.contrib.auth.ref="{% static 'favicon_io/apple-touch-icon.png' %}">
   <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon_io/favicon-32x32.png' %}">
   <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon_io/favicon-16x16.png' %}">
   <link rel="manifest" href="{% static 'favicon_io/site.webmanifest' %}">
@@ -118,12 +118,13 @@
                 </a>
             </li>
              </li class="nav-item">
-                <a class="nav-link waves-effect" href=""> logout</a>
+                <a class="nav-link waves-effect" href="{% url 'logout'%}"> logout</a>
             </li>
             {% else %}
              </li class="nav-item">
-                <a class="nav-link waves-effect" href=""> login</a>
-            </li>
+                <a class="nav-link waves-effect" href="{% url 'login'%}"> login</a>
+             </li>
+
             {% endif %}
         </ul>
 
