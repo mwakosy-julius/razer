@@ -3,32 +3,28 @@ from django.db import models
 from django.shortcuts import reverse
 from django_countries.fields import CountryField
 
-CATEGORY = (
-    ('A', 'Apple'),
-    ('HP', 'HP'),
-    ('acer', 'Acer'),
-    ('MS', 'Microsoft'),
-    ('R', 'Razer'),
-    ('Huaw', 'Huawei'),
-    ('Del', 'Dell'),
-    ('Ln', 'Lenovo'),
-    ('AS', 'Asus'),
-    ('Thin', 'ThinkPad'),
-)
+
 
 LABEL = (
     ('N', 'New'),
     ('BS', 'Best deal')
 )
 
+class Category(models.Model):
+    name = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.name
+    
+
 class Item(models.Model):
     item_name = models.CharField(max_length=100)
     price = models.DecimalField(default=0, decimal_places=2, max_digits=11)
     discount_price = models.DecimalField(default=0, decimal_places=2, max_digits=11, blank=True, null=True)
-    category = models.CharField(choices=CATEGORY, max_length=10)
     label = models.CharField(choices=LABEL, max_length=10)
     description = models.TextField(default='', blank=True,null=True)
     image = models.ImageField(upload_to='uploads/product/')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, default =1)
 
     def __str__(self):
         return self.item_name
