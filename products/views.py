@@ -36,7 +36,7 @@ class HomeView(ListView):
         items_list = context['items']  # Retrieve items queryset from the context
 
         # Number of items per page
-        items_per_page = 10
+        items_per_page = 12
 
         # Get the queryset
         items_list = Item.objects.all()
