@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load custom_filters %}
 
 {% block content %}
 
@@ -280,12 +281,12 @@
       <strong>
       {% if item.discount_price %}
       <span class="mr-1">
-        <del>${{ item.price }}</del>
+        <del>TSh {{ item.price|add_commas }}</del>
         </span>
-        <span style="color: #E53935;">${{ item.discount_price }}
+        <span style="color: #E53935;">TSh {{ item.discount_price|add_commas }}
         </span>
       {% else %}
-      ${{ item.price }}
+      TSh {{ item.price|add_commas }}
       {% endif %}
       </strong>
     </h6>

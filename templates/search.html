@@ -159,12 +159,12 @@
       <strong>
       {% if item.discount_price %}
       <span class="mr-1">products
-        <del>${{ item.price }}</del>
+        <del>TSh{{ item.price }}</del>
         </span>
         <span style="color: #E53935;">${{ item.discount_price }}
         </span>
       {% else %}
-      ${{ item.price }}
+      TSh{{ item.price }}
       {% endif %}
       </strong>
     </h6>

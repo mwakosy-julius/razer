@@ -113,7 +113,7 @@ class CheckoutView(View):
                 order.save()
 
                 if payment_option == 'S':
-                    return redirect('cproducts:payment', payment_option='stripe')
+                    return redirect('products:payment', payment_option='stripe')
                 elif payment_option == 'P':
                     return redirect('products:payment', payment_option='paypal')
                 else:
@@ -140,7 +140,7 @@ class PaymentView(View):
         try:
             charge = stripe.Charge.create(
                 amount=amount,
-                currency="usd",
+                currency="tsh",
                 source=token
             )
 
@@ -212,7 +212,28 @@ def category(request, brand):
     try:
         category = Category.objects.get(name=brand)
         brands = Item.objects.filter(category=category)
-        return render(request, 'category.html', {'brands':brands,'category':category})
+
+         # Number of items per page
+        items_per_page = 12
+
+        # Get the queryset
+        items_list = brands
+
+        print("Number of items before pagination:", len(items_list)) # For debugging
+
+        paginator = Paginator(items_list, items_per_page)
+
+        page_number = request.GET.get('page')
+        try:
+            items = paginator.page(page_number)
+        except PageNotAnInteger:
+            # If page is not an integer, deliver first page.
+            items = paginator.page(1)
+        except EmptyPage:
+            # If page is out of range, deliver last page of results.
+            items = paginator.page(paginator.num_pages)
+    
+        return render(request, 'category.html', {'brands':items,'category':category})
     
     except:
         messages.success(request, ("That category doesn't exist...."))
@@ -248,10 +269,9 @@ def register_user(request):
 
             user = authenticate(username= username, password =  password )
             login(request,user)
-            messages.success(request, ("You have been registered successfully!!"))
+            messages.success(request, f'Account created for {username}')
             return redirect('/')
         else:
-            messages.success(request, ("Whoops! There was a problem, please try again!"))
             return redirect('products:register')
     else:
         return render(request, 'registration/register.html', {'form':form})

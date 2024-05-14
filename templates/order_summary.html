@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load custom_filters %}
 
 {% block content %}
 
@@ -26,10 +27,10 @@
             <td>{{ order_item.item.item_name }}</td>
             <td>
             {% if order_item.item.discount_price %}
-                <del>${{ order_item.item.price}}</del> 
-                ${{ order_item.item.discount_price }}
+                <del>TSh {{ order_item.item.price|add_commas}}</del> 
+                TSh {{ order_item.item.discount_price|add_commas }}
             {% else %}
-                ${{ order_item.item.price}}
+                TSh {{ order_item.item.price|add_commas}}
             {% endif %}
 
             </td>
@@ -40,10 +41,10 @@
             </td>
             <td>
             {% if order_item.item.discount_price %}
-                ${{ order_item.get_discount_item_price }} 
-                <span class="badge badge-success" >Saved ${{ order_item.get_amount_saved }}</span>
+                TSh {{ order_item.get_discount_item_price|add_commas }} 
+                <span class="badge badge-success" >Saved TSh {{ order_item.get_amount_saved|add_commas }}</span>
             {% else %}
-                ${{ order_item.get_total_item_price}}
+                TSh {{ order_item.get_total_item_price|add_commas}}
             {% endif %}
              <a href="{% url 'products:remove-from-cart' order_item.item.pk %}">
                 <i class="fas fa-trash float-right text-danger"></i>
@@ -68,7 +69,7 @@
         {% if object.get_total_price %}
         <tr>
             <td colspan="4"><b>Total Order Price</b></td>
-            <td>${{ object.get_total_price }}</td>
+            <td>TSh {{ object.get_total_price|add_commas }}</td>
         </tr>
          <tr>
             <td colspan="5">
