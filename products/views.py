@@ -11,7 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView, View
 from django.utils import timezone
-from .forms import CheckoutForm
+from .forms import CheckoutForm, SearchForm
 from .forms import SignUpForm
 from .models import (
     Item,
@@ -56,6 +56,9 @@ class HomeView(ListView):
             items = paginator.page(paginator.num_pages)
 
         context['items'] = items  # Update context with paginated items
+
+        context['form'] = SearchForm()
+        
         return context
 
 
@@ -198,16 +201,39 @@ class PaymentView(View):
             return redirect('/')
         
 def search(request):
+    form = SearchForm(request.GET or None)
     query = request.GET.get('query')
     if query:
         items = Item.objects.filter(item_name__icontains=query)
     else:
         items = Item.objects.all()
-    return render(request, 'search.html', {'items': items, 'query': query})
+    
+    # Number of items per page
+    items_per_page = 12
 
+        # Get the queryset
+    items_list = items
+
+    print("Number of items before pagination:", len(items_list)) # For debugging
+
+    paginator = Paginator(items_list, items_per_page)
+
+    page_number = request.GET.get('page')
+    try:
+        items = paginator.page(page_number)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        items = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range, deliver last page of results.
+        items = paginator.page(paginator.num_pages)
+        
+            
+    return render(request, 'search.html', {'items': items, 'query': query, 'form': form})
 
 def category(request, brand):
-
+    form = SearchForm(request.GET or None)
+    
     #lookup the brand from the url
     try:
         category = Category.objects.get(name=brand)
@@ -233,7 +259,7 @@ def category(request, brand):
             # If page is out of range, deliver last page of results.
             items = paginator.page(paginator.num_pages)
     
-        return render(request, 'category.html', {'brands':items,'category':category})
+        return render(request, 'category.html', {'brands':items,'category':category, 'form': form})
     
     except:
         messages.success(request, ("That category doesn't exist...."))

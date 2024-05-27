@@ -116,3 +116,13 @@ class UpdateProfileForm(forms.ModelForm):
     class Meta:
         # model = Profile
         fields = ['avatar', 'bio']
+
+class SearchForm(forms.Form):
+    query = forms.CharField(
+        label='',
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Search products, brands and categories',
+            'class': 'form-control',
+            'style': ' display: inline-block;'
+        })
+    )
